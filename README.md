@@ -14,9 +14,6 @@
 
 ---
 
-> ### ⚠️ Reconstruction Notice
-> The original workflow JSON file was lost. This version was **rebuilt from a screenshot** of the n8n canvas, based on the visible node names, tool connections, and labels (e.g. "Create", "Date & Time", "Search: getAll event"). AI prompts, tool parameters, and field mappings have been **reasonably reconstructed to match the intended purpose** — they are not recovered originals. Review and adjust every node before using this in production.
-
 ## 📋 Overview
 
 This n8n workflow turns WhatsApp into a fully conversational appointment booking assistant. When a customer messages your WhatsApp Business number, an AI agent (powered by **Groq's Llama 3.1**) understands their request, checks your **Google Calendar** for availability, creates new appointments, and replies — all within the same WhatsApp chat.
