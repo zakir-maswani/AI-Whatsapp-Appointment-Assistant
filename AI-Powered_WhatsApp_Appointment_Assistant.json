@@ -1,0 +1,188 @@
+{
+  "name": "AI-Powered WhatsApp Appointment Assistant",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": ["messages"],
+        "options": {}
+      },
+      "type": "n8n-nodes-base.whatsAppTrigger",
+      "typeVersion": 1,
+      "position": [-560, -80],
+      "id": "trig-whatsapp-0001",
+      "name": "WhatsApp Trigger",
+      "webhookId": "YOUR_WHATSAPP_WEBHOOK_ID",
+      "credentials": {
+        "whatsAppTriggerApi": {
+          "id": "YOUR_WHATSAPP_TRIGGER_CREDENTIAL_ID",
+          "name": "WhatsApp OAuth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.messages[0].text.body }}",
+        "options": {
+          "systemMessage": "=You are a friendly appointment booking assistant communicating over WhatsApp. Help the user check availability, book, reschedule, or cancel appointments using the available calendar tools.\n\nGuidelines:\n1. Always confirm the date and time with the user before creating an event.\n2. Use the 'Get Date & Time' tool when you need to know the current date/time to resolve relative terms like 'tomorrow' or 'next Monday'.\n3. Use the 'Search' tool to check existing events before booking, to avoid double-booking.\n4. Use the 'Create' tool to add a confirmed appointment to the calendar.\n5. Keep replies short, clear, and conversational — this is a WhatsApp chat, not an email.\n6. If required details (name, date, time, purpose) are missing, ask for them before booking."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [-280, -80],
+      "id": "agent-0001",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": "llama-3.1-8b-instant",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [-320, 120],
+      "id": "groq-0001",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "YOUR_GROQ_CREDENTIAL_ID",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $json.messages[0].from }}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [-200, 120],
+      "id": "memory-0001",
+      "name": "Memory"
+    },
+    {
+      "parameters": {
+        "resource": "event",
+        "operation": "create",
+        "calendar": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_CALENDAR_ID",
+          "mode": "list"
+        },
+        "start": "={{ $fromAI('startDateTime', 'ISO 8601 start date and time of the appointment') }}",
+        "end": "={{ $fromAI('endDateTime', 'ISO 8601 end date and time of the appointment') }}",
+        "additionalFields": {
+          "summary": "={{ $fromAI('summary', 'Short title for the appointment') }}",
+          "description": "={{ $fromAI('description', 'Additional notes about the appointment') }}"
+        }
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [-80, 120],
+      "id": "calendar-create-0001",
+      "name": "Create",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "YOUR_GOOGLE_CALENDAR_CREDENTIAL_ID",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dateTimeTool",
+      "typeVersion": 2,
+      "position": [40, 120],
+      "id": "datetime-0001",
+      "name": "Date & Time"
+    },
+    {
+      "parameters": {
+        "resource": "event",
+        "operation": "getAll",
+        "calendar": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_CALENDAR_ID",
+          "mode": "list"
+        },
+        "returnAll": false,
+        "limit": 10,
+        "options": {
+          "timeMin": "={{ $fromAI('timeMin', 'Start of the search window, ISO 8601') }}",
+          "timeMax": "={{ $fromAI('timeMax', 'End of the search window, ISO 8601') }}"
+        }
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [160, 120],
+      "id": "calendar-search-0001",
+      "name": "Search",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "YOUR_GOOGLE_CALENDAR_CREDENTIAL_ID",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "message",
+        "operation": "send",
+        "phoneNumberId": "YOUR_WHATSAPP_PHONE_NUMBER_ID",
+        "recipientPhoneNumber": "={{ $('WhatsApp Trigger').item.json.messages[0].from }}",
+        "textBody": "={{ $json.output }}"
+      },
+      "type": "n8n-nodes-base.whatsApp",
+      "typeVersion": 1,
+      "position": [40, -80],
+      "id": "whatsapp-send-0001",
+      "name": "Send message",
+      "webhookId": "YOUR_WHATSAPP_SEND_WEBHOOK_ID",
+      "credentials": {
+        "whatsAppApi": {
+          "id": "YOUR_WHATSAPP_API_CREDENTIAL_ID",
+          "name": "WhatsApp account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "WhatsApp Trigger": {
+      "main": [[{ "node": "AI Agent", "type": "main", "index": 0 }]]
+    },
+    "AI Agent": {
+      "main": [[{ "node": "Send message", "type": "main", "index": 0 }]]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [[{ "node": "AI Agent", "type": "ai_languageModel", "index": 0 }]]
+    },
+    "Memory": {
+      "ai_memory": [[{ "node": "AI Agent", "type": "ai_memory", "index": 0 }]]
+    },
+    "Create": {
+      "ai_tool": [[{ "node": "AI Agent", "type": "ai_tool", "index": 0 }]]
+    },
+    "Date & Time": {
+      "ai_tool": [[{ "node": "AI Agent", "type": "ai_tool", "index": 0 }]]
+    },
+    "Search": {
+      "ai_tool": [[{ "node": "AI Agent", "type": "ai_tool", "index": 0 }]]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "reconstructed-0001",
+  "meta": {
+    "templateCredsSetupCompleted": false
+  },
+  "nodeGroups": [],
+  "id": "RECONSTRUCTED0002",
+  "tags": []
+}

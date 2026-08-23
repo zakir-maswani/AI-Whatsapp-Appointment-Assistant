@@ -1,0 +1,18 @@
+# n8n
+.n8n/
+n8n_data/
+
+# Environment & secrets
+.env
+.env.local
+*.key
+*credentials*.json
+!AI-Powered_WhatsApp_Appointment_Assistant.json
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
