@@ -21,11 +21,11 @@ This n8n workflow turns WhatsApp into a fully conversational appointment booking
 ## 🔄 How It Works
 
 ```
-💬 WhatsApp Trigger  →  🤖 AI Agent (Groq)  →  📤 Send Message (WhatsApp)
+ WhatsApp Trigger  →   AI Agent (Groq)  →   Send Message (WhatsApp)
                               │
                  ┌────────────┼────────────┐
                  ▼            ▼            ▼
-             🗓️ Create   🕐 Date & Time  🔍 Search
+              Create    Date & Time   Search
             (new event)  (resolve "today",  (check existing
                           "tomorrow", etc.)   events — getAll)
 ```
@@ -79,11 +79,11 @@ This n8n workflow turns WhatsApp into a fully conversational appointment booking
 ## 📁 Repository Structure
 
 ```
-├── AI-Powered_WhatsApp_Appointment_Assistant.json   # Reconstructed n8n workflow (needs configuration)
+├── AI-Powered_WhatsApp_Appointment_Assistant.json   
 ├── README.md
 ├── appointment_assistant.mp4
-├── appointment_assistant.png                                       # You are here
-└── LICENSE                                            # MIT License
+├── appointment_assistant.png                                      
+└── LICENSE                                            
 ```
 
 ## 🔒 Security Note
