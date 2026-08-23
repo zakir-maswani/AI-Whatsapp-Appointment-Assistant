@@ -80,7 +80,9 @@ This n8n workflow turns WhatsApp into a fully conversational appointment booking
 
 ```
 ├── AI-Powered_WhatsApp_Appointment_Assistant.json   # Reconstructed n8n workflow (needs configuration)
-├── README.md                                         # You are here
+├── README.md
+├── appointment_assistant.mp4
+├── appointment_assistant.png                                       # You are here
 └── LICENSE                                            # MIT License
 ```
 
